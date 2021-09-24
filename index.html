@@ -1,0 +1,60 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Matrix Color Filter</title>
+  <style>
+    .display { display: flex; }
+    #original { flex: 0 0 50%; }
+    #original img { width: 100%; }
+    #matrix { flex: 0 0 50%; }
+  </style>
+</head>
+
+<body>
+  <input class="upload" type='file'/>
+
+  <div class="display">
+    <div id="original">
+      <img src="#"/>
+    </div>
+    <canvas id="matrix"></canvas>
+  </div>
+
+  <script>
+    window.addEventListener('load', function() {
+
+      var canvas = document.getElementById("matrix");
+      var ctx = canvas.getContext("2d");
+
+      document.querySelector('.upload').addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+          var img = document.querySelector("#original img");
+
+          img.onload = () => {
+            URL.revokeObjectURL(img.src);  // no longer needed, free memory
+
+            canvas.width = img.clientWidth;
+            canvas.height = img.clientHeight;
+
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            var image_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var data = image_data.data;
+            for (var i=0; i<data.length; i+=4) {
+              data[i]   = Math.pow(data[i]/255, 3/2) * 255;
+              data[i+1] = Math.pow(data[i+1]/255, 4/5) * 255;
+              data[i+2] = Math.pow(data[i+2]/255, 3/2) * 255;
+            }
+
+            ctx.putImageData(image_data, 0, 0);
+          }
+
+          img.src = URL.createObjectURL(this.files[0]); // set src to blob url
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
+  
